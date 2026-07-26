@@ -26,11 +26,11 @@ exports.handler = async function (event) {
     return { statusCode: 400, body: JSON.stringify({ error: '"messages" array is required' }) };
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.new_claudegemini;
   if (!apiKey) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Server is missing GEMINI_API_KEY. Set it in Netlify: Site settings -> Environment variables. Get a free key at https://ai.google.dev' }),
+      body: JSON.stringify({ error: 'Server is missing the new_claudegemini environment variable. Set it in Netlify: Site settings -> Environment variables.' }),
     };
   }
 
