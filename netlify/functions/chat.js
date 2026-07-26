@@ -5,7 +5,7 @@
 // Get a free key (no credit card required) at https://ai.google.dev -> "Get API key".
 // Free tier as of 2026: ~1,500 requests/day on gemini-2.5-flash, no expiration.
 
-const MODEL = 'gemini-2.5-flash';
+const MODEL = 'gemini-flash-latest';
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
 const MAX_OUTPUT_TOKENS = 2048;
 
