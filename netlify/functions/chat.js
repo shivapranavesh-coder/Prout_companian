@@ -3,10 +3,11 @@
 // it is never sent to or visible from the browser.
 //
 // Get a free key (no credit card required) at https://ai.google.dev -> "Get API key".
+// Free tier as of 2026: ~1,500 requests/day on gemini-2.5-flash, no expiration.
 
-const MODEL = 'gemini-flash-latest';
+const MODEL = 'gemini-2.5-flash';
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
-const MAX_OUTPUT_TOKENS = 700;
+const MAX_OUTPUT_TOKENS = 2048;
 
 exports.handler = async function (event) {
   if (event.httpMethod !== 'POST') {
@@ -25,11 +26,11 @@ exports.handler = async function (event) {
     return { statusCode: 400, body: JSON.stringify({ error: '"messages" array is required' }) };
   }
 
-  const apiKey = process.env.gemini_api_key;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Server is missing the gemini_api_key environment variable. Set it in Netlify: Site settings -> Environment variables.' }),
+      body: JSON.stringify({ error: 'Server is missing GEMINI_API_KEY. Set it in Netlify: Site settings -> Environment variables. Get a free key at https://ai.google.dev' }),
     };
   }
 
