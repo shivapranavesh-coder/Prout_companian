@@ -13,6 +13,19 @@ const els = {
 
 let index = null;
 let history = []; // {role, content}
+let lastTopicQuery = ''; // last user message that had enough content words to search on well
+
+// Follow-ups like "explain in detail", "why", "what do you mean" carry almost no
+// searchable content on their own. If the new message barely tokenizes to anything
+// (after stopword removal), treat it as a continuation of the previous topic rather
+// than a fresh search query.
+function buildSearchQuery(q) {
+  const contentWords = tokenize(q); // tokenize() comes from search.js, loaded before this file
+  const isVagueFollowUp = contentWords.length < 3 && lastTopicQuery;
+  const searchQuery = isVagueFollowUp ? `${lastTopicQuery} ${q}` : q;
+  if (!isVagueFollowUp) lastTopicQuery = q;
+  return searchQuery;
+}
 
 const SYSTEM_PROMPT = `You are Prout Companion, a study guide for P.R. Sarkar's economic and social philosophy PROUT (Progressive Utilization Theory), grounded strictly in the excerpts from "Prout in a Nutshell" (Parts 1-21) and "Proutist Economics" provided to you as CONTEXT below each question.
 
@@ -154,7 +167,8 @@ async function handleSend(e) {
 }
 
 async function runQuery(q) {
-  const results = index.search(q, 5);
+  const searchQuery = buildSearchQuery(q);
+  const results = index.search(searchQuery, 5);
   const context = buildContext(results);
 
   const typingBubble = addMessage('assistant', '…thinking…');
