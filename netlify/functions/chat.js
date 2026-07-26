@@ -26,7 +26,7 @@ exports.handler = async function (event) {
     return { statusCode: 400, body: JSON.stringify({ error: '"messages" array is required' }) };
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.gemini_api_key;
   if (!apiKey) {
     return {
       statusCode: 500,
