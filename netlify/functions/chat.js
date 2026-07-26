@@ -142,4 +142,58 @@ exports.handler = async function (event) {
     console.error('Function error:', err);
     return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
   }
+};  // Gemini uses roles "user" and "model" (not "assistant"), and a separate
+  // top-level systemInstruction field instead of a system-role message.
+  const contents = messages.map((m) => ({
+    role: m.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: m.content }],
+  }));
+
+  const body = {
+    contents,
+    generationConfig: { maxOutputTokens: MAX_OUTPUT_TOKENS, temperature: 0.6 },
+  };
+  if (system) {
+    body.systemInstruction = { parts: [{ text: system }] };
+  }
+
+  try {
+    const resp = await fetch(`${GEMINI_URL}?key=${encodeURIComponent(apiKey)}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+    const data = await resp.json();
+
+    if (!resp.ok) {
+      console.error('Gemini API error:', resp.status, data);
+      return {
+        statusCode: 502,
+        body: JSON.stringify({ error: (data && data.error && data.error.message) || 'Upstream AI API error' }),
+      };
+    }
+
+    const candidate = data.candidates && data.candidates[0];
+    const text = candidate && candidate.content && candidate.content.parts
+      ? candidate.content.parts.map((p) => p.text || '').join('\n')
+      : '';
+
+    if (!text.trim()) {
+      const reason = (candidate && candidate.finishReason) || 'unknown';
+      return {
+        statusCode: 502,
+        body: JSON.stringify({ error: `Model returned no text (finishReason: ${reason})` }),
+      };
+    }
+
+    return {
+      statusCode: 200,
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ text }),
+    };
+  } catch (err) {
+    console.error('Function error:', err);
+    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+  }
 };
