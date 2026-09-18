@@ -110,7 +110,7 @@ async function callChatAPI(system, messages, statusFn) {
         statusFn(`Connection hiccup — retrying (${attempt}/${MAX_AUTO_RETRIES})…`);
         await sleep(700 * attempt);
       }
-      const resp = await fetch('/.netlify/functions/chat', {
+      const resp = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ system, messages }),
